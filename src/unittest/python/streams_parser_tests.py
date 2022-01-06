@@ -8,7 +8,6 @@ from stream_parser import read_oanda_streams_file
 class StreamParserTest(unittest.TestCase):
     folder = os.environ.get('fixtures', 'fixtures')
     file = path.abspath(path.join(folder, 'oanda_streams_sample.json'))
-    print("**debug** using file path to fixture: %s" % file)
 
     def test_should_parse_valid_lines(self):
         output = read_oanda_streams_file(self.file)

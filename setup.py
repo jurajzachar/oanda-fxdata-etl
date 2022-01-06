@@ -33,11 +33,11 @@ import glob
 import shutil
 
 from sys import version_info
+
 py3 = version_info[0] == 3
 py2 = not py3
 if py2:
     FileNotFoundError = OSError
-
 
 def install_pyb():
     try:
@@ -63,6 +63,15 @@ except subprocess.CalledProcessError as e:
         sys.exit(e.returncode)
 
 try:
+    from setuptools import setup
+
+    setup(name='oanda-fxdata-etl',
+          version='0.1',
+          install_requires = [
+            'python-dateutil'
+          ]
+    )
+
     from pybuilder.cli import main
     # verbose, debug, skip all optional...
     if main("-v", "-X", "-o", "--reset-plugins", "clean", "package"):
