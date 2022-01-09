@@ -24,5 +24,14 @@ create table "oanda_fx_prices" (
     closeout_ask    double precision,
     closeout_midpoint double precision generated always as ((closeout_ask - closeout_bid / 2) + closeout_bid) stored
 );
-
 select create_hypertable('oanda_fx_prices', 'time', 'instrument_code', 20)
+
+-- schema for book-keeping of processed files
+drop table if exists "oanda_fx_files";
+create table "oanda_fx_files" (
+  folder varchar(64) not null,
+  filename varchar(64) not null,
+  time_discovered    timestamp default current_timestamp,
+  time_processed    timestamp default null,
+  primary key (folder, filename)
+);
