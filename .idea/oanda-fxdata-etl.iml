@@ -6,7 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/unittest/python" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="inheritedJdk" />
+    <orderEntry type="jdk" jdkName="Python 3.8 (oanda-fxdata-etl)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>
