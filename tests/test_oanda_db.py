@@ -3,8 +3,9 @@ import psycopg2
 import logging
 import os
 from oanda_filesystem import *
+from db import *
 
-class OandaFilesystemTest(unittest.TestCase):
+class OandaDbTest(unittest.TestCase):
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.DEBUG)
     folder = os.environ.get('fixtures', 'fixtures')
     conn = None
@@ -29,7 +30,7 @@ class OandaFilesystemTest(unittest.TestCase):
             )
             logging.info("successfully verified connection to the database")
             cur = self.conn.cursor()
-            cur.execute("TRUNCATE oanda_fx_files")
+            cur.execute("TRUNCATE oanda.oanda_fx_files")
             self.conn.commit()
             cur.close()
             self.conn.close()
@@ -42,11 +43,11 @@ class OandaFilesystemTest(unittest.TestCase):
         self.assertEqual(len(files), 1)
         self.assertEqual("oanda_streams_sample.json", files[0])
 
-    def test_oanda_filesystem_should_successfully_open_connection_to_the_test_db(self):
+    def test_db_should_successfully_open_connection_to_the_test_db(self):
         persistence = Persistence()
         self.assertIsNotNone(persistence.conn)
 
-    def test_oanda_filesystem_should_successfully_upsert_file_to_the_test_db(self):
+    def test_db_should_successfully_upsert_file_to_the_test_db(self):
         persistence = Persistence()
         for file in list_in_dir(self.folder):
             result = persistence.upsert_to_db(self.folder, file)

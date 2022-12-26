@@ -1,8 +1,6 @@
 import os.path
 import unittest
-from mockito import mock, verify
 from os import path
-from pybuilder.core import task
 from stream_parser import read_oanda_streams_file
 from oanda_dto import *
 

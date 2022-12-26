@@ -1,14 +1,8 @@
-import os.path
 import logging
+import os
+
 import psycopg2
-from os import listdir
-from os.path import isfile, join
 
-def list_in_dir(dir):
-    if not os.path.isdir(dir):
-        raise RuntimeError("%s is not a directory" % dir)
-
-    return [f for f in listdir(dir) if isfile(join(dir, f))]
 
 class Persistence():
     dbname = None
@@ -21,8 +15,11 @@ class Persistence():
 
     def __del__(self):
         if self.conn is not None:
-            self.conn.close()
-            logging.info("successfully closed database connection")
+            try:
+                self.conn.close()
+                logging.info("successfully closed database connection")
+            except (Exception, psycopg2.DataError) as error:
+                logging.error("failed to gracefully close database connection due to: %s " % error)
 
     def __init__(self):
         self.dbname = os.environ.get("dbname")
@@ -55,11 +52,13 @@ class Persistence():
                 host=self.dbhost,
                 port=self.dbport
             )
-            logging.info("successfully established connection to the database=%s as user=%s at host=%s:%d" % (
-                self.dbname, self.dbuser, self.dbhost, int(self.dbport))
+            result = self.conn.cursor().execute('select current_time').fetchAll()
+            assert result is not None
+            logging.info("successfully established connection to the database=%s as user=%s at host=%s:%d, current_time=%s" % (
+                self.dbname, self.dbuser, self.dbhost, int(self.dbport), result)
             )
         except (Exception, psycopg2.DataError) as error:
-            logging.error("failed to connect to the database due to: " + error)
+            logging.error("failed to connect to the database due to: %s" % error)
 
     def upsert_to_db(self, folder, filename)-> (str, str):
         """ attempts to insert a new filesystem asset into oanda_fx_files if it does not exist.
@@ -76,5 +75,5 @@ class Persistence():
             cursor.close()
             return result
         except (Exception, psycopg2.DatabaseError) as error:
-            logging.error("failed to persist (%s, %s) due to %s", folder, filename, error)
+            logging.error("failed to persist (%s, %s) due to %s" % folder, filename, error)
             return None
