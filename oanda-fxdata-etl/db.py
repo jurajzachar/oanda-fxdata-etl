@@ -5,13 +5,19 @@ import psycopg2
 
 
 class Persistence():
-    dbname = None
-    dbuser = None
-    dbpwd = None
-    dbhost = None
-    dbport = None
 
-    conn = None
+    def __init__(self):
+        self.conn = None
+        self.db_name = os.environ.get("db_name")
+        assert self.db_name is not None, "env var 'db_name' must be set"
+        self.db_user = os.environ.get("db_user")
+        assert self.db_user is not None, "env var 'db_user' must be set"
+        self.db_pwd = os.environ.get("db_pwd")
+        assert self.db_pwd is not None, "env var 'db_pwd' must be set"
+        self.db_host = os.environ.get("db_host")
+        assert self.db_host is not None, "env var 'db_host' must be set"
+        self.db_port = os.environ.get("db_port")
+        assert self.db_port is not None, "env var 'db_port' must be set"
 
     def __del__(self):
         if self.conn is not None:
@@ -21,46 +27,26 @@ class Persistence():
             except (Exception, psycopg2.DataError) as error:
                 logging.error("failed to gracefully close database connection due to: %s " % error)
 
-    def __init__(self):
-        self.dbname = os.environ.get("dbname")
-        self.dbuser = os.environ.get("dbuser")
-        self.dbpwd = os.environ.get("dbpwd")
-        self.dbhost = os.environ.get("dbhost")
-        self.dbport = os.environ.get("dbport")
-
-        if self.dbname is None:
-            raise RuntimeError("env var 'dbname' is set?")
-
-        if self.dbuser is None:
-            raise RuntimeError("env var 'dbuser' is set?")
-
-        if self.dbpwd is None:
-            raise RuntimeError("env var 'dbpwd' is set?")
-
-        if self.dbhost is None:
-            raise RuntimeError("env var 'dbhost' is set?")
-
-        if self.dbport is None:
-            raise RuntimeError("env var 'dbport' is set?")
-
+    def connect(self) -> 'Persistence':
         try:
             # connect to the PostgreSQL database
             self.conn = psycopg2.connect(
-                database=self.dbname,
-                user=self.dbuser,
-                password=self.dbpwd,
-                host=self.dbhost,
-                port=self.dbport
+                database=self.db_name,
+                user=self.db_user,
+                password=self.db_pwd,
+                host=self.db_host,
+                port=self.db_port
             )
             result = self.conn.cursor().execute('select current_time').fetchAll()
             assert result is not None
-            logging.info("successfully established connection to the database=%s as user=%s at host=%s:%d, current_time=%s" % (
-                self.dbname, self.dbuser, self.dbhost, int(self.dbport), result)
+            logging.info(
+                "successfully established connection to the database=%s as user=%s at host=%s:%d, current_time=%s" % (
+                    self.db_name, self.db_user, self.db_host, int(self.db_port), result)
             )
         except (Exception, psycopg2.DataError) as error:
             logging.error("failed to connect to the database due to: %s" % error)
 
-    def upsert_to_db(self, folder, filename)-> (str, str):
+    def upsert_to_db(self, folder, filename) -> (str, str):
         """ attempts to insert a new filesystem asset into oanda_fx_files if it does not exist.
         See schema.sql for details"""
         sql = """INSERT INTO oanda_fx_files(folder, filename) values(%s, %s) ON CONFLICT DO NOTHING 

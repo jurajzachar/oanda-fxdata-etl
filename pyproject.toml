@@ -9,13 +9,13 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-wheel = "^0.36"
-Flask = "^2.0"
-six = "^1.16"
-Jinja2 = "^3.0"
+python = "^3.10"
+psycopg2-binary = "^2.9"
+fastapi = "^0.104"
 
 [tool.poetry.dev-dependencies]
+pytest = "^7"
+pytest-cov = "^4"
 mockito = "^1.4"
 
 [build-system]

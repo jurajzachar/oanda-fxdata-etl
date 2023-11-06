@@ -11,22 +11,22 @@ class OandaDbTest(unittest.TestCase):
     conn = None
 
     # set os environ to test db
-    os.environ.setdefault('dbname', 'fxdata')
-    os.environ.setdefault('dbuser', 'timescaledb')
-    os.environ.setdefault('dbpwd', 'timescaledb123')
-    os.environ.setdefault('dbhost', 'localhost')
-    os.environ.setdefault('dbport', '5432')
+    os.environ.setdefault('db_name', 'fxdata')
+    os.environ.setdefault('db_user', 'timescaledb')
+    os.environ.setdefault('db_pwd', 'timescaledb123')
+    os.environ.setdefault('db_host', 'localhost')
+    os.environ.setdefault('db_port', '5432')
 
     # verify test env is setup
     def setUp(self):
         # verify connection to the test PostgreSQL database
         try:
             self.conn = psycopg2.connect(
-                database=os.environ.get('dbname'),
-                user=os.environ.get('dbuser'),
-                password=os.environ.get('dbpwd'),
-                host=os.environ.get('dbhost'),
-                port=os.environ.get('dbport')
+                database=os.environ.get('db_name'),
+                user=os.environ.get('db_user'),
+                password=os.environ.get('db_pwd'),
+                host=os.environ.get('db_host'),
+                port=os.environ.get('db_port')
             )
             logging.info("successfully verified connection to the database")
             cur = self.conn.cursor()

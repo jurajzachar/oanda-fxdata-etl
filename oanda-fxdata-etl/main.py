@@ -1,23 +1,31 @@
 import logging
-from flask import Flask
-from oanda_filesystem import *
-app = Flask(__name__)
 
-@app.route("/healthcheck")
+from db import Persistence
+from oanda_filesystem import *
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+
+FX_FOLDER = '/oxygen/oanda-streams'
+app = FastAPI()
+app.mount("/static", StaticFiles(directory=FX_FOLDER), name="static")
+
+@app.get("/healthcheck")
 def healthcheck():
     return "healthy"
+
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
 
     # discover files in dir and dump them to db
     persistence = Persistence()
-    fx_folder = '/oxygen/oanda-streams'
-    for file in list_in_dir(fx_folder):
-        logging.info("saving '%s' to the db", join(fx_folder, file))
-        persistence.upsert_to_db(folder=fx_folder, filename=file)
-
-    #dispose of persistent connection
-    persistence.__del__()
-
-    app.run(host='0.0.0.0', port=8080)
+    try:
+        persistence.connect()
+        for file in list_in_dir(FX_FOLDER):
+            logging.info("saving '%s' to the db", join(FX_FOLDER, file))
+            persistence.upsert_to_db(folder=FX_FOLDER, filename=file)
+    except Exception as e:
+        logging.error("failed ingest raw Oanda FX files ")
+    finally:
+        # dispose of persistent connection
+        logging.info("system tear-down in progress")

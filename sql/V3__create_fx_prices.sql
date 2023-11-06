@@ -1,4 +1,4 @@
--- Table: public.oanda_fx_prices
+    -- Table: public.oanda_fx_prices
 
 -- DROP TABLE IF EXISTS public.oanda_fx_prices;
 
