@@ -17,6 +17,7 @@ fastapi = "^0.104"
 pytest = "^7"
 pytest-cov = "^4"
 mockito = "^1.4"
+testcontainers = {version=">=3.7", extras=["postgres"]}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

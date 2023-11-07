@@ -1,11 +1,12 @@
 import logging
-
+import os
 from db import Persistence
 from oanda_filesystem import *
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-FX_FOLDER = '/oxygen/oanda-streams'
+# prod: '/oxygen/oanda-streams'
+FX_FOLDER = os.getenv('fx_folder', '/oxygen/oanda-streams')
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=FX_FOLDER), name="static")
 
