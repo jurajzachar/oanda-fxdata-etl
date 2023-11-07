@@ -1,13 +1,11 @@
-CREATE TABLE IF NOT EXISTS oanda.oanda_fx_files
+CREATE TABLE IF NOT EXISTS "fx_files"
 (
-    folder character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    filename character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    path            character varying(128) COLLATE pg_catalog."default" NOT NULL,
     time_discovered timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-    time_processed timestamp without time zone,
-    CONSTRAINT oanda_fx_files_pkey PRIMARY KEY (folder, filename)
+    time_processed  timestamp without time zone,
+    CONSTRAINT oanda_fx_files_pkey PRIMARY KEY (path)
 )
+    TABLESPACE pg_default;
 
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS oanda.oanda_fx_files
-    OWNER to timescaledb;
+ALTER TABLE IF EXISTS "fx_files"
+    OWNER to maintainer;

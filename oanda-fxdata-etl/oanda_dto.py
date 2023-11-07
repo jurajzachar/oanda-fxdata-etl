@@ -1,5 +1,5 @@
 """encapsulation of Oanda Prices DTO"""
-# see schema.sql
+# see hypertable.sql
 from builtins import RuntimeError
 from dataclasses import dataclass
 from datetime import datetime

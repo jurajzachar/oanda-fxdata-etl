@@ -1,2 +1,5 @@
+-- TODO restrict permissions
 CREATE SCHEMA IF NOT EXISTS oanda
-    AUTHORIZATION timescaledb;
+    AUTHORIZATION maintainer;
+
+SET search_path = oanda

@@ -48,7 +48,7 @@ class Persistence():
 
     def upsert_to_db(self, folder, filename) -> (str, str):
         """ attempts to insert a new filesystem asset into oanda_fx_files if it does not exist.
-        See schema.sql for details"""
+        See hypertable.sql for details"""
         sql = """INSERT INTO oanda_fx_files(folder, filename) values(%s, %s) ON CONFLICT DO NOTHING 
         RETURNING (folder, filename)"""
 

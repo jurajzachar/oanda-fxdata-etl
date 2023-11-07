@@ -1,5 +1,3 @@
-import logging
-import os
 from db import Persistence
 from oanda_filesystem import *
 from fastapi import FastAPI
