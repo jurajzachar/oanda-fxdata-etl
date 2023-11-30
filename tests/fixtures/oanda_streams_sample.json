@@ -1,3 +1,4 @@
+{"type":"PRICE","time":"2021-10-22T19:34:08.122332673Z","bids":[{"pri
 {"type":"PRICE","time":"2021-10-22T19:34:08.122332673Z","bids":[{"price":"1.37556","liquidity":1000000},{"price":"1.37555","liquidity":2000000},{"price":"1.37554","liquidity":2000000},{"price":"1.37552","liquidity":5000000}],"asks":[{"price":"1.37569","liquidity":1000000},{"price":"1.37571","liquidity":4000000},{"price":"1.37573","liquidity":5000000}],"closeoutBid":"1.37552","closeoutAsk":"1.37573","status":"tradeable","tradeable":true,"instrument":"GBP_USD"}
 {"type":"PRICE","time":"2021-10-22T19:34:08.166739770Z","bids":[{"price":"84.724","liquidity":5000000}],"asks":[{"price":"84.738","liquidity":5000000}],"closeoutBid":"84.724","closeoutAsk":"84.738","status":"tradeable","tradeable":true,"instrument":"AUD_JPY"}
 {"type":"HEARTBEAT","time":"2021-10-22T21:11:18.856756858Z"}

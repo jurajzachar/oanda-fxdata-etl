@@ -2,8 +2,9 @@ import unittest
 import psycopg2
 import logging
 import os
-from oanda_filesystem import *
 from db import *
+from fs import list_in_dir
+
 
 class OandaDbTest(unittest.TestCase):
     logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.DEBUG)

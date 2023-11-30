@@ -1,8 +1,8 @@
 import os.path
 import unittest
 from os import path
-from stream_parser import read_oanda_streams_file
-from oanda_dto import *
+from fs import read_oanda_streams_file
+from oanda_schema import *
 
 class OandaDtoTest(unittest.TestCase):
     folder = os.environ.get('fixtures', 'fixtures')

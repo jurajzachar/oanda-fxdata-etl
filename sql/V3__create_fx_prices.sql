@@ -2,19 +2,8 @@
 
 -- DROP TABLE IF EXISTS public.oanda_fx_prices;
 
--- Type: trading_venue
-
--- DROP TYPE IF EXISTS public.trading_venue;
-
-CREATE TYPE IF NOT EXISTS oanda.trading_venue AS ENUM
-    ('oanda');
-
-ALTER TYPE oanda.trading_venue
-    OWNER TO timescaledb;
-
 CREATE TABLE IF NOT EXISTS oanda.fx_prices
 (
-    source oanda.trading_venue DEFAULT 'oanda'::oanda.trading_venue,
     "time" timestamp with time zone NOT NULL,
     currency_code character varying(10) COLLATE pg_catalog."default" NOT NULL,
     bid_price_l1 double precision,
