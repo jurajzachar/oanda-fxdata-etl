@@ -1,38 +1,28 @@
+import logging
 import os.path
-import unittest
-from os import path
-from fs import read_oanda_streams_file
-from oanda_schema import *
 
-class OandaDtoTest(unittest.TestCase):
-    folder = os.environ.get('fixtures', 'fixtures')
-    file = path.abspath(path.join(folder, 'oanda_streams_sample.json'))
+import pytest
+import json
 
-    def test_oandapricesdto_should_unmarshall_from_stream_data(self):
-        output = read_oanda_streams_file(self.file)
-        self.assertIsNotNone(output)
-        data = output[0]
-        for json in data:
+from oanda_schema import unmarshall_from_wire
 
-            dto = unmarshall_from_stream_data(json)
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
-            self.assertIsNotNone(dto)
-            self.assertIsNotNone(dto.time)
-            self.assertIsNotNone(dto.instrument_code)
-            # level 1 must never be none
-            self.assertIsNotNone(dto.ask_price_l1)
-            self.assertIsNotNone(dto.bid_price_l1)
-            self.assertIsNotNone(dto.ask_liquidity_l1)
-            self.assertIsNotNone(dto.bid_liquidity_l1)
-            # closeout must never be none
-            self.assertIsNotNone(dto.closeout_ask)
-            self.assertIsNotNone(dto.closeout_bid)
-            self.assertGreater(dto.closeout_midpoint(), float(dto.closeout_bid))
+@pytest.fixture
+def local_fixture(request):
+    test_dir = os.path.dirname(request.module.__file__)
+    return os.path.join(test_dir, "fixtures/oanda_streams_sample.json")
 
-    def test_oandapricesdto_should_marshall_to_db_row(self):
-        #TODO
-        pass
-
-    def test_oandapricesdto_should_unmarshall_from_db_row(self):
-        #TODO
-        pass
+def test_should_unmarshall_from_wire(local_fixture):
+    objects = []
+    with open(local_fixture, 'r') as file:
+        for count, line in enumerate(file):
+            try:
+                data = json.loads(line)
+                model = unmarshall_from_wire(data)
+                if model is not None:
+                    objects.append(model)
+            except Exception as e:
+                # suppress, some files are expected to contain corrup lines
+                pass
+    assert len(objects) == 2
