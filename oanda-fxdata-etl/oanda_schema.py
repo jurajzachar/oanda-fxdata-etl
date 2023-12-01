@@ -69,13 +69,3 @@ def unmarshall_from_wire(data: dict) -> Optional[OandaPriceTick]:
         # propagate
         logging.error(f"failed to parse data={data}; {e.args}")
         return None
-
-
-def marshall_to_db_row(row):
-    # TODO
-    return None
-
-
-def unmarshall_from_db_row(row):
-    # TODO
-    return None
