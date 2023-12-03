@@ -23,6 +23,6 @@ def test_should_unmarshall_from_wire(local_fixture):
                 if model is not None:
                     objects.append(model)
             except Exception as e:
-                # suppress, some files are expected to contain corrup lines
+                # suppress, some files are expected to contain corrupt lines
                 pass
     assert len(objects) == 2
