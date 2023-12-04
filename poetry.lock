@@ -382,6 +382,17 @@ files = [
 ]
 
 [[package]]
+name = "joblib"
+version = "1.3.2"
+description = "Lightweight pipelining with Python functions"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "joblib-1.3.2-py3-none-any.whl", hash = "sha256:ef4331c65f239985f3f2220ecc87db222f08fd22097a3dd5698f693875f8cbb9"},
+    {file = "joblib-1.3.2.tar.gz", hash = "sha256:92f865e621e17784e7955080b6d042489e3b8e294949cc44c6eac304f59772b1"},
+]
+
+[[package]]
 name = "mockito"
 version = "1.4.0"
 description = "Spying framework"
@@ -1003,4 +1014,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "9a2d359dee6ea3af4be374a5fab49d7f16686af5860b52148c9dd8b0ef62057f"
+content-hash = "ae097869616193234beaf6bbf72e00c94cd995ed5bfcd7b1446b9a289682777a"
