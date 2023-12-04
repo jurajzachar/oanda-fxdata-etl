@@ -1,7 +1,10 @@
 import logging
 import os
+from typing import List
 
 import psycopg2
+
+from oanda_schema import OandaPriceTick
 
 
 class Persistence:
@@ -70,19 +73,46 @@ class Persistence:
             with self.conn.cursor() as curs:
                 try:
                     curs.execute(sql)
-
                 except psycopg2.Error as error:
                     logging.error(f"failed to execute database migration={migration_file} due to:{error.args}")
         return self
 
+    def insert_to_fx_prices(self, bulk_data: List[OandaPriceTick]):
+        """ attempts to insert a bulk of OandaPriceTick into oanda_fx_prices if it does not exist.
+             See oanda_schema.sql for details"""
+
+        def toPostgresTuple(x: OandaPriceTick) -> str:
+            return f"('{x.time}'::timestamptz,'{x.instrument}',{x.bid_price_l1},{x.bid_price_l2},{x.bid_price_l3}," \
+                   f"{x.ask_price_l1},{x.ask_price_l2},{x.ask_price_l3},{x.bid_liquidity_l1},{x.bid_liquidity_l2}," \
+                   f"{x.bid_liquidity_l3},{x.ask_liquidity_l1},{x.ask_liquidity_l2},{x.ask_liquidity_l3},{x.closeout_bid}," \
+                   f"{x.closeout_ask})" \
+                .replace("None", 'null')
+
+        data_to_insert = list(map(toPostgresTuple, [x for x in bulk_data if x is not None]))
+        insert_query = f"INSERT INTO oanda.fx_prices VALUES {','.join(data_to_insert)} ON CONFLICT DO NOTHING " \
+                       f"RETURNING (\"time\",\"instrument\")"
+        try:
+            # create a new cursor
+            cursor = self.conn.cursor()
+            cursor.execute(insert_query, data_to_insert)
+            result = cursor.fetchall()
+            self.conn.commit()
+            cursor.close()
+            return result
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.conn.rollback()
+            logging.error(f"failed to persist ({len(bulk_data)} items due to {error.args}")
+            return None
+
     def upsert_to_fx_files(self, folder, filename) -> (str, str):
         """ attempts to insert a new filesystem asset into oanda_fx_files if it does not exist.
-        See schema.sql for details"""
+        See oanda_schema.sql for details"""
         try:
             # create a new cursor
             cursor = self.conn.cursor()
             cursor.execute(
-                f"INSERT INTO oanda.fx_files(path) values('{os.path.join(folder, filename)}') ON CONFLICT DO NOTHING RETURNING *")
+                f"INSERT INTO oanda.fx_files(path) values('{os.path.join(folder, filename)}') ON CONFLICT DO NOTHING "
+                f"RETURNING *")
             result = cursor.fetchone()
             self.conn.commit()
             cursor.close()
@@ -91,3 +121,40 @@ class Persistence:
             self.conn.rollback()
             logging.error(f"failed to persist ({folder}, {filename}) due to {error.args}")
             return None
+
+    def mark_fx_file_processed(self, path:str) -> (str, str):
+        """ attempts to mark the existing folder/filename as processed with the current timestamp """
+        try:
+            # create a new cursor
+            cursor = self.conn.cursor()
+            cursor.execute(
+                f"UPDATE oanda.fx_files SET time_processed = current_timestamp where path = '{path}'"
+                f"RETURNING *")
+            result = cursor.fetchone()
+            self.conn.commit()
+            cursor.close()
+            return result
+        except (Exception, psycopg2.DatabaseError) as error:
+            self.conn.rollback()
+            logging.error(f"failed mark '{path}' as processed due to {error.args}")
+            return None
+
+    def fetch_unprocessed(self, offset:int, limit:int = 25):
+        """fetches a page of unprocessed folder/filename entries using the provided offset"""
+        with self.conn.cursor() as curs:
+            sql = f"select path from oanda.fx_files where time_processed is null order by path limit {limit} offset {offset}"
+            try:
+                curs.execute(sql)
+                return curs.fetchall()
+            except psycopg2.Error as error:
+                logging.error(f"failed to fetch unprocessed path entries with {sql}, due to:{error.args}")
+
+    def fetch_processed(self, offset:int, limit:int = 25):
+        """fetches a page of unprocessed folder/filename entries using the provided offset"""
+        with self.conn.cursor() as curs:
+            sql = f"select path from oanda.fx_files where time_processed is not null order by path limit {limit} offset {offset}"
+            try:
+                curs.execute(sql)
+                return curs.fetchall()
+            except psycopg2.Error as error:
+                logging.error(f"failed to fetch unprocessed path entries with {sql}, due to:{error.args}")
