@@ -21,7 +21,6 @@ def move_all_processed_files_to_long_term_storage(pers: Persistence):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', filename='/tmp/cleanup_fs.log', encoding='utf-8',
-                        level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
     persistence = Persistence.from_environment().connect()
     move_all_processed_files_to_long_term_storage(persistence)
