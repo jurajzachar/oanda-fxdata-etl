@@ -15,17 +15,16 @@ CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical"
     ask_liquidity_l2  integer,
     ask_liquidity_l3  integer,
     closeout_bid      double precision,
-    closeout_ask      double precision,
-    closeout_midpoint double precision GENERATED ALWAYS AS (((closeout_ask - (closeout_bid / (2)::double precision)) + closeout_bid)) STORED
+    closeout_ask      double precision
 )
 PARTITION BY RANGE(time);
 
-CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2020" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2020-01-01') TO ('2020-12-31');
-CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2021" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2021-01-01') TO ('2021-12-31');
-CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2022" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2022-01-01') TO ('2022-12-31');
-CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2023" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2023-01-01') TO ('2023-12-31');
-CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2024" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2024-01-01') TO ('2024-12-31');
-CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2025" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2025-01-01') TO ('2025-12-31');
+CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2020" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2020-01-01') TO ('2021-01-01');
+CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2021" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2021-01-01') TO ('2022-01-01');
+CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2022" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2022-01-01') TO ('2023-01-01');
+CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2023" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2023-01-01') TO ('2024-01-01');
+CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2024" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2024-01-01') TO ('2025-01-01');
+CREATE TABLE IF NOT EXISTS "oanda"."fx_prices_historical_2025" PARTITION OF "oanda"."fx_prices_historical" FOR VALUES FROM ('2025-01-01') TO ('2026-01-01');
 
 -- create index on instrument code to make queries faster
 CREATE INDEX IF NOT EXISTS fx_prices_historical__instrument_index ON oanda.fx_prices_historical USING HASH (instrument);

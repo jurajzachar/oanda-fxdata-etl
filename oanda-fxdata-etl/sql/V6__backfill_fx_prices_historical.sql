@@ -16,5 +16,5 @@ select
  ask_liquidity_l3,
  closeout_bid,
  closeout_ask
-from oanda.fx_prices where time > '2020-01-01' and time <= '2021-12-31' order by time asc
+from oanda.fx_prices where time > '2020-01-01' and time <= '2021-12-31' ON CONFLICT DO NOTHING
 ;

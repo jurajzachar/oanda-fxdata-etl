@@ -1,7 +1,6 @@
 import logging
 import os.path
 from random import randrange
-from threading import Thread
 
 from config import *
 from db import Persistence
@@ -20,7 +19,7 @@ def healthcheck():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(asctime)s %(levelname)s:\n %(message)s', level=logging.INFO)
 
 
     def partition(list, n: int):

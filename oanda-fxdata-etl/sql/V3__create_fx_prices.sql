@@ -15,8 +15,7 @@ CREATE TABLE IF NOT EXISTS "oanda"."fx_prices"
     ask_liquidity_l2  integer,
     ask_liquidity_l3  integer,
     closeout_bid      double precision,
-    closeout_ask      double precision,
-    closeout_midpoint double precision GENERATED ALWAYS AS (((closeout_ask - (closeout_bid / (2)::double precision)) + closeout_bid)) STORED
+    closeout_ask      double precision
 )
 PARTITION BY RANGE(time)
 ;
