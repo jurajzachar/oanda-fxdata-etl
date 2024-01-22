@@ -4,23 +4,11 @@ from random import randrange
 
 from config import *
 from db import Persistence
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
 
 from fs import list_in_dir, read_oanda_streams_file
 
-app = FastAPI()
-app.mount("/static", StaticFiles(directory=FX_FOLDER), name="static")
-
-
-@app.get("/healthcheck")
-def healthcheck():
-    return "healthy"
-
-
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s:\n %(message)s', level=logging.INFO)
-
 
     def partition(list, n: int):
         """helper function to partition list into fixed-sized chunks"""
@@ -28,14 +16,11 @@ if __name__ == "__main__":
         for i in range(0, len(list), n):
             yield list[i:i + n]
 
-
     try:
         persistence_pool = [Persistence.from_environment().connect() for x in range(PERSISTENCE_POOL_SIZE)]
 
-
         def assign_persistence():
             return persistence_pool[randrange(PERSISTENCE_POOL_SIZE)]
-
 
         # phase 1: discover unprocessed files in directory
         for file in list_in_dir(FX_FOLDER):
