@@ -1,18 +1,18 @@
-import asyncio
 import logging
 import logging as log
 import os
+from urllib.parse import urlparse
 
 import pytest
 from testcontainers.postgres import PostgresContainer
-from urllib.parse import urlparse
+
 from db import Persistence
 from oanda_schema import unmarshall_from_wire
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def postgresql_session(request) -> Persistence:
     log.info("[fixture] starting db container")
     # pin version to 14.10 to achieve timescaledb compat:
@@ -53,12 +53,14 @@ def test_should_upsert_to_fx_files(postgresql_session: Persistence):
     inserted = postgresql_session.upsert_to_fx_files('foo', 'bar')
     assert inserted[0] == os.path.join('foo', 'bar')
 
+
 def test_should_fetch_unprocessed_fx_files(postgresql_session: Persistence):
     assert postgresql_session is not None
     postgresql_session.upsert_to_fx_files('/fake-folder', 'fake-file')
     unprocessed = postgresql_session.fetch_unprocessed(0)
     assert unprocessed[0][0] == os.path.join('/fake-folder', 'fake-file')
     assert postgresql_session.fetch_unprocessed(1) == []
+
 
 def test_should_fetch_processed_fx_files(postgresql_session: Persistence):
     assert postgresql_session is not None
@@ -68,12 +70,14 @@ def test_should_fetch_processed_fx_files(postgresql_session: Persistence):
     assert processed[0][0] == os.path.join('/fake-folder2', 'fake-file2')
     assert postgresql_session.fetch_processed(1) == []
 
+
 def test_should_mark_fx_file_processed(postgresql_session: Persistence):
     assert postgresql_session is not None
     # returns the tuple if insert is successful
     postgresql_session.upsert_to_fx_files('/folder1', 'file2')
     marked = postgresql_session.mark_fx_file_processed(os.path.join('/folder1', 'file2'))
     assert marked[0] is not None
+
 
 def test_should_upsert_to_fx_prices(postgresql_session: Persistence):
     data = [{"type": "PRICE", "time": "2021-10-22T19:34:08.122332673Z",

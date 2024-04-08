@@ -19,13 +19,15 @@ websocket-client = "*"
 
 [tool.poetry.dev-dependencies]
 pyinstaller = "^6"
-pytest = "^7"
+pytest = "^8.1.1"
+coverage = "^7.4.4"
 pytest-cov = "^4"
 mockito = "^1.4"
 testcontainers = {version=">=3.7", extras=["postgres"]}
 
 [tool.poetry.scripts]
 build = "scripts.installer:install"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -1,6 +1,4 @@
 import os.path
-import unittest
-from os import path
 
 import pytest
 

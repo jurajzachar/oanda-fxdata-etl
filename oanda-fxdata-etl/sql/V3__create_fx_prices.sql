@@ -16,6 +16,4 @@ CREATE TABLE IF NOT EXISTS "oanda"."fx_prices"
     ask_liquidity_l3  integer,
     closeout_bid      double precision,
     closeout_ask      double precision
-)
-PARTITION BY RANGE(time)
-;
+);
