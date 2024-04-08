@@ -12,4 +12,7 @@
     <orderEntry type="jdk" jdkName="Poetry (oanda-fxdata-etl)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
+  <component name="PackageRequirementsSettings">
+    <option name="requirementsPath" value="" />
+  </component>
 </module>

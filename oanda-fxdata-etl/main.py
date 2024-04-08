@@ -6,6 +6,10 @@ from config import *
 from db import Persistence
 
 from fs import list_in_dir, read_oanda_streams_file
+import threading
+
+# Create a lock
+lock = threading.Lock()
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s:\n %(message)s', level=logging.INFO)
@@ -25,7 +29,8 @@ if __name__ == "__main__":
         # phase 1: discover unprocessed files in directory
         for file in list_in_dir(FX_FOLDER):
             logging.info(f"saving unprocessed file path '{os.path.join(FX_FOLDER, file)}' to the database")
-            assign_persistence().upsert_to_fx_files(folder=FX_FOLDER, filename=file)
+            with lock:
+                assign_persistence().upsert_to_fx_files(folder=FX_FOLDER, filename=file)
 
         # phase 2: ingest into postgres timescaledb
         offset = 0
@@ -36,11 +41,13 @@ if __name__ == "__main__":
                 logging.info(f"processing path={path}")
                 try:
                     for batch in list(partition(list(read_oanda_streams_file(path)), BATCH_SIZE)):
-                        persistence = assign_persistence()
-                        persistence.insert_to_fx_prices(batch)
+                        with lock:
+                            persistence = assign_persistence()
+                            persistence.insert_to_fx_prices(batch)
                 except Exception as e:
                     logging.error(f"recovering from error {e.args}")
-                marked = assign_persistence().mark_fx_file_processed(path)
+                with lock:
+                    marked = assign_persistence().mark_fx_file_processed(path)
                 logging.info(f"path={marked} marked as successfully processed")
             offset += 1
 

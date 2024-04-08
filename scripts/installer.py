@@ -1,5 +1,7 @@
-import PyInstaller.__main__
 from pathlib import Path
+
+import PyInstaller.__main__
+
 NAME = "oanda-fxdata-etl"
 HERE = Path(__file__).parent.absolute()
 path_to_search = str(HERE / ".." / NAME)
@@ -16,3 +18,6 @@ def install():
         '--paths',
         path_to_search
     ])
+
+if __name__ == '__main__':
+    install()
