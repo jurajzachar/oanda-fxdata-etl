@@ -32,4 +32,5 @@ jobs:
 
     - name: Run tests
       run: |
-        poetry shell && coverage run -m pytest && coverage report -m
+        poetry run coverage run -m pytest
+        poetry run coverage report -m
