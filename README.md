@@ -10,3 +10,8 @@ poetry build
 ```
 python -m unittest discover .
 ```
+
+## Install
+```
+poetry run python scripts/installer.py
+```
