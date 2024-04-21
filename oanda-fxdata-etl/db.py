@@ -41,17 +41,7 @@ class Persistence(AbstractContextManager):
                 host=self.db_host,
                 port=self.db_port
             )
-
-            self.conn.set_session(isolation_level='SERIALIZABLE', autocommit=True)
-
-            with self.conn.cursor() as curs:
-                curs.execute('select current_time')
-                res = curs.fetchone()
-                assert res is not None
-            logging.info(
-                f"successfully established connection to the database={self.db_name} as user={self.db_user} at host="
-                f"{self.db_host}:{self.db_port}, current_time={res}"
-            )
+            self.conn.set_session(isolation_level='SERIALIZABLE', autocommit=False)
             return self
         except psycopg2.Error as error:
             logging.error(f"failed to connect to the database due to:{error.args}")
@@ -71,11 +61,14 @@ class Persistence(AbstractContextManager):
         current_dir = os.path.dirname(os.path.realpath(__file__))
         with open(os.path.join(current_dir, 'sql', migration_file), 'r') as f:
             sql = f.read()
-            with self.conn.cursor() as curs:
+            with self.conn.cursor() as cursor:
                 try:
-                    curs.execute(sql)
+                    cursor.execute(sql)
+                    self.conn.commit()
                 except psycopg2.Error as error:
                     logging.error(f"failed to execute database migration={migration_file} due to:{error.args}")
+                finally:
+                    cursor.close()
         return self
 
     def insert_to_fx_prices(self, bulk_data: List[OandaPriceTick]):
@@ -94,10 +87,10 @@ class Persistence(AbstractContextManager):
                        f"RETURNING (\"time\",\"instrument\")"
         try:
             # create a new cursor
-            cursor = self.conn.cursor()
-            cursor.execute(insert_query, data_to_insert)
-            result = cursor.fetchall()
-            self.conn.commit()
+            with self.conn.cursor() as cursor:
+                cursor.execute(insert_query, data_to_insert)
+                result = cursor.fetchall()
+                self.conn.commit()
             cursor.close()
             return result
         except (Exception, psycopg2.DatabaseError) as error:
@@ -110,35 +103,37 @@ class Persistence(AbstractContextManager):
         See oanda_schema.sql for details"""
         try:
             # create a new cursor
-            cursor = self.conn.cursor()
-            cursor.execute(
-                f"INSERT INTO oanda.fx_files(path) values('{os.path.join(folder, filename)}') ON CONFLICT DO NOTHING "
-                f"RETURNING *")
-            result = cursor.fetchone()
-            self.conn.commit()
-            cursor.close()
+            with self.conn.cursor() as cursor:
+                cursor.execute(
+                    f"INSERT INTO oanda.fx_files(path) values('{os.path.join(folder, filename)}') ON CONFLICT DO NOTHING "
+                    f"RETURNING *")
+                result = cursor.fetchone()
+                self.conn.commit()
             return result
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()
             logging.error(f"failed to persist ({folder}, {filename}) due to {error.args}")
             return None
+        finally:
+            cursor.close()
 
     def mark_fx_file_processed(self, path:str) -> (str, str):
         """ attempts to mark the existing folder/filename as processed with the current timestamp """
         try:
             # create a new cursor
-            cursor = self.conn.cursor()
-            cursor.execute(
-                f"UPDATE oanda.fx_files SET time_processed = current_timestamp where path = '{path}'"
-                f"RETURNING *")
-            result = cursor.fetchone()
-            self.conn.commit()
-            cursor.close()
-            return result
+            with self.conn.cursor() as cursor:
+                cursor.execute(
+                    f"UPDATE oanda.fx_files SET time_processed = current_timestamp where path = '{path}'"
+                    f"RETURNING *")
+                result = cursor.fetchone()
+                self.conn.commit()
+                return result
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()
             logging.error(f"failed mark '{path}' as processed due to {error.args}")
             return None
+        finally:
+            cursor.close()
 
     def fetch_unprocessed(self, offset:int, limit:int = 25):
         """fetches a page of unprocessed folder/filename entries using the provided offset"""
