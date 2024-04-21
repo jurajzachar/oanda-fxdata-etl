@@ -18,7 +18,7 @@ def list_in_dir(dir: str) -> List[str]:
     """ list all files in given directory """
     if not os.path.isdir(dir):
         raise RuntimeError(f"'{dir}' is not a directory")
-    return [f for f in listdir(dir) if isfile(join(dir, f))]
+    return [f for f in listdir(dir) if isfile(join(dir, f)) and f.endswith(".gz")]
 
 
 def move_file_to_dir(file: str, source_dir: str, target_dir: str) -> str:

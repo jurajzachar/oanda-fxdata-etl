@@ -130,7 +130,7 @@ class Persistence(AbstractContextManager):
                 return result
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()
-            logging.error(f"failed mark '{path}' as processed due to {error.args}")
+            logging.error(f"failed to mark '{path}' as processed due to {error.args}")
             return None
         finally:
             cursor.close()

@@ -9,13 +9,13 @@ from fs import list_in_dir, read_oanda_streams_file
 
 def process_file(entry):
     path = entry[0]
-    logging.info(f"processing path={path}")
     try:
+        logging.info(f"processing path={path} ...")
         with Persistence.from_environment() as p:
             for batch in list(partition(list(read_oanda_streams_file(path)), BATCH_SIZE)):
                 p.insert_to_fx_prices(batch)
-                marked = p.mark_fx_file_processed(path)
-                logging.info(f"path={marked} marked as successfully processed")
+            marked = p.mark_fx_file_processed(path)
+        logging.info(f"path={marked} marked as successfully processed")
     except Exception as persistenceError:
         logging.error(f"recovering from error {persistenceError.args}")
     return None
