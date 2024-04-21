@@ -27,7 +27,7 @@ def postgresql_session(request) -> Persistence:
         postgres.POSTGRES_PASSWORD,
         'localhost',
         urlparse(conn_url).port
-    ).connect()
+    ).__enter__()
     assert persistence is not None
     with persistence.conn.cursor() as curs:
         curs.execute('show server_version')
