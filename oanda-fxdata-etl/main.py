@@ -1,34 +1,24 @@
 import logging
-from random import randrange
 from concurrent.futures import ThreadPoolExecutor
 
 from config import *
 from db import Persistence
 
 from fs import list_in_dir, read_oanda_streams_file
-import threading
-
-persistence_pool = [Persistence.from_environment().connect() for x in range(PERSISTENCE_POOL_SIZE)]
-# Create a lock
-lock = threading.Lock()
-
-
-def assign_persistence():
-    return persistence_pool[randrange(PERSISTENCE_POOL_SIZE)]
 
 
 def process_file(entry):
     path = entry[0]
     logging.info(f"processing path={path}")
     try:
-        for batch in list(partition(list(read_oanda_streams_file(path)), BATCH_SIZE)):
-            persistence = assign_persistence()
-            persistence.insert_to_fx_prices(batch)
-    except Exception as e:
-        logging.error(f"recovering from error {e.args}")
-
-    marked = assign_persistence().mark_fx_file_processed(path)
-    logging.info(f"path={marked} marked as successfully processed")
+        with Persistence.from_environment() as p:
+            for batch in list(partition(list(read_oanda_streams_file(path)), BATCH_SIZE)):
+                p.insert_to_fx_prices(batch)
+                marked = p.mark_fx_file_processed(path)
+                logging.info(f"path={marked} marked as successfully processed")
+    except Exception as persistenceError:
+        logging.error(f"recovering from error {persistenceError.args}")
+    return None
 
 
 if __name__ == "__main__":
@@ -46,16 +36,17 @@ if __name__ == "__main__":
         # phase 1: discover unprocessed files in directory
         for file in list_in_dir(FX_FOLDER):
             logging.info(f"saving unprocessed file path '{os.path.join(FX_FOLDER, file)}' to the database")
-            assign_persistence().upsert_to_fx_files(folder=FX_FOLDER, filename=file)
+            with Persistence.from_environment() as persistence:
+                persistence.upsert_to_fx_files(folder=FX_FOLDER, filename=file)
 
         # phase 2: ingest into postgres timescaledb
         offset = 0
-        while unprocessed := assign_persistence().fetch_unprocessed(offset=offset, limit=12):
-            logging.info(f"fetched unprocessed page [{offset}]={unprocessed}")
-            with lock:
+        with Persistence.from_environment() as persistence:
+            while unprocessed := persistence.fetch_unprocessed(offset=offset, limit=12):
+                logging.info(f"fetched unprocessed page [{offset}]={unprocessed}")
                 with ThreadPoolExecutor(max_workers=12) as executor:
                     executor.map(process_file, unprocessed)
-                offset += 1
+            offset += 1
 
     except Exception as e:
         logging.error(f"failed to ingest and mark unprocessed oanda market data, reason:{e.args}")

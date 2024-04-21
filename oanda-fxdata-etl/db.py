@@ -1,5 +1,6 @@
 import logging
 import os
+from contextlib import AbstractContextManager
 from typing import List
 
 import psycopg2
@@ -7,7 +8,7 @@ import psycopg2
 from oanda_schema import OandaPriceTick
 
 
-class Persistence:
+class Persistence(AbstractContextManager):
 
     def __init__(self, db_name, db_user, db_pwd, db_host, db_port):
         self.conn = None
@@ -22,7 +23,7 @@ class Persistence:
         self.db_port = db_port
         assert self.db_port is not None, "'db_port' must be set"
 
-    def __del__(self):
+    def __exit__(self, exc_type, exc_value, traceback):
         if self.conn is not None:
             try:
                 self.conn.close()
@@ -30,17 +31,7 @@ class Persistence:
             except (Exception, psycopg2.DataError) as error:
                 logging.error("failed to gracefully close database connection due to: %s " % error)
 
-    @staticmethod
-    def from_environment():
-        return Persistence(
-            os.environ.get("db_name"),
-            os.environ.get("db_user"),
-            os.environ.get("db_pwd"),
-            os.environ.get("db_host"),
-            os.environ.get("db_port")
-        )
-
-    def connect(self) -> 'Persistence':
+    def __enter__(self) -> 'Persistence':
         try:
             # connect to the PostgreSQL database
             self.conn = psycopg2.connect(
@@ -65,6 +56,16 @@ class Persistence:
         except psycopg2.Error as error:
             logging.error(f"failed to connect to the database due to:{error.args}")
             raise error
+
+    @staticmethod
+    def from_environment():
+        return Persistence(
+            os.environ.get("db_name"),
+            os.environ.get("db_user"),
+            os.environ.get("db_pwd"),
+            os.environ.get("db_host"),
+            os.environ.get("db_port")
+        )
 
     def execute_migration(self, migration_file: str) -> 'Persistence':
         current_dir = os.path.dirname(os.path.realpath(__file__))
