@@ -40,13 +40,11 @@ if __name__ == "__main__":
                 persistence.upsert_to_fx_files(folder=FX_FOLDER, filename=file)
 
         # phase 2: ingest into postgres timescaledb
-        offset = 0
         with Persistence.from_environment() as persistence:
-            while unprocessed := persistence.fetch_unprocessed(offset=offset, limit=12):
-                logging.info(f"fetched unprocessed page [{offset}]={unprocessed}")
-                with ThreadPoolExecutor(max_workers=12) as executor:
-                    executor.map(process_file, unprocessed)
-            offset += 1
+            unprocessed = persistence.fetch_all_unprocessed()
+            logging.info(f"fetched unprocessed files {len(unprocessed)}")
+            with ThreadPoolExecutor(max_workers=12) as executor:
+                executor.map(process_file, unprocessed)
 
     except Exception as e:
         logging.error(f"failed to ingest and mark unprocessed oanda market data, reason:{e.args}")

@@ -135,7 +135,17 @@ class Persistence(AbstractContextManager):
         finally:
             cursor.close()
 
-    def fetch_unprocessed(self, offset:int, limit:int = 25):
+    def fetch_all_unprocessed(self):
+        """fetches a page of unprocessed folder/filename entries using the provided offset"""
+        with self.conn.cursor() as curs:
+            sql = f"select path from oanda.fx_files where time_processed is null order by path"
+            try:
+                curs.execute(sql)
+                return curs.fetchall()
+            except psycopg2.Error as error:
+                logging.error(f"failed to fetch unprocessed path entries with {sql}, due to:{error.args}")
+
+    def fetch_unprocessed(self, offset: int, limit: int = 25):
         """fetches a page of unprocessed folder/filename entries using the provided offset"""
         with self.conn.cursor() as curs:
             sql = f"select path from oanda.fx_files where time_processed is null order by path limit {limit} offset {offset}"
@@ -145,7 +155,7 @@ class Persistence(AbstractContextManager):
             except psycopg2.Error as error:
                 logging.error(f"failed to fetch unprocessed path entries with {sql}, due to:{error.args}")
 
-    def fetch_processed(self, offset:int, limit:int = 25):
+    def fetch_processed(self, offset: int, limit: int = 25):
         """fetches a page of unprocessed folder/filename entries using the provided offset"""
         with self.conn.cursor() as curs:
             sql = f"select path from oanda.fx_files where time_processed is not null order by path limit {limit} offset {offset}"
