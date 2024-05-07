@@ -120,7 +120,7 @@ class Persistence(AbstractContextManager):
     def mark_fx_file_processed(self, path:str) -> (str, str):
         """ attempts to mark the existing folder/filename as processed with the current timestamp """
         try:
-            # create a new cursor
+            self.conn.set_session(isolation_level='REPEATABLE READ', autocommit=False)
             with self.conn.cursor() as cursor:
                 cursor.execute(
                     f"UPDATE oanda.fx_files SET time_processed = current_timestamp where path = '{path}'"
