@@ -41,7 +41,7 @@ class Persistence(AbstractContextManager):
                 host=self.db_host,
                 port=self.db_port
             )
-            self.conn.set_session(isolation_level='REPEATABLE READ', autocommit=False)
+            self.conn.set_session(isolation_level='REPEATABLE READ', autocommit=True)
             return self
         except psycopg2.Error as error:
             logging.error(f"failed to connect to the database due to:{error.args}")
@@ -64,8 +64,8 @@ class Persistence(AbstractContextManager):
             with self.conn.cursor() as cursor:
                 try:
                     cursor.execute(sql)
-                    self.conn.commit()
                 except psycopg2.Error as error:
+                    self.conn.rollback()
                     logging.error(f"failed to execute database migration={migration_file} due to:{error.args}")
                 finally:
                     cursor.close()
@@ -90,7 +90,6 @@ class Persistence(AbstractContextManager):
             with self.conn.cursor() as cursor:
                 cursor.execute(insert_query, data_to_insert)
                 result = cursor.fetchall()
-                self.conn.commit()
             cursor.close()
             return result
         except (Exception, psycopg2.DatabaseError) as error:
@@ -108,7 +107,6 @@ class Persistence(AbstractContextManager):
                     f"INSERT INTO oanda.fx_files(path) values('{os.path.join(folder, filename)}') ON CONFLICT DO NOTHING "
                     f"RETURNING *")
                 result = cursor.fetchone()
-                self.conn.commit()
             return result
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()
@@ -126,7 +124,6 @@ class Persistence(AbstractContextManager):
                     f"UPDATE oanda.fx_files SET time_processed = current_timestamp where path = '{path}'"
                     f"RETURNING *")
                 result = cursor.fetchone()
-                self.conn.commit()
                 return result
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()
