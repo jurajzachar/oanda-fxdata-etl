@@ -41,7 +41,7 @@ class Persistence(AbstractContextManager):
                 host=self.db_host,
                 port=self.db_port
             )
-            self.conn.set_session(isolation_level='SERIALIZABLE', autocommit=False)
+            self.conn.set_session(isolation_level='REPEATABLE READ', autocommit=False)
             return self
         except psycopg2.Error as error:
             logging.error(f"failed to connect to the database due to:{error.args}")
