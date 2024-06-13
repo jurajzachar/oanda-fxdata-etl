@@ -22,9 +22,9 @@ def postgresql_session(request) -> Persistence:
     conn_url = postgres.get_connection_url()
     log.info("[fixture] connecting to: {}".format(conn_url))
     persistence = Persistence(
-        postgres.POSTGRES_DB,
-        postgres.POSTGRES_USER,
-        postgres.POSTGRES_PASSWORD,
+        postgres.dbname,
+        postgres.username,
+        postgres.password,
         'localhost',
         urlparse(conn_url).port
     ).__enter__()
