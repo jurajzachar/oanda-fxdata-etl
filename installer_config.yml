@@ -1,0 +1,9 @@
+oanda-fxdata-etl:
+  name: oanda-fxdata-etl
+  path_to_main: ./oanda-fxdata-etl/main.py
+  path_to_search: ./oanda-fxdata-etl
+
+postgres_creds:
+  name: postgres_creds
+  path_to_main: ./scripts/postgres_creds.py
+  path_to_search: ./scripts
