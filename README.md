@@ -13,7 +13,7 @@ python -m unittest discover .
 
 ## Install
 ```
-poetry run python scripts/installer.py
+poetry run python ./installer.py
 ```
 
 ## Run
@@ -24,5 +24,5 @@ export db_pwd=somedbpwd
 export db_host=localhost
 export db_port=5432
 
-$ oanda-fxdata-etl
+$ ./dist/oanda-fxdata-etl
 ```

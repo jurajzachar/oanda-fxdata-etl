@@ -22,12 +22,12 @@ def postgresql_session(request) -> Persistence:
     conn_url = postgres.get_connection_url()
     log.info("[fixture] connecting to: {}".format(conn_url))
     persistence = Persistence(
-        postgres.POSTGRES_DB,
-        postgres.POSTGRES_USER,
-        postgres.POSTGRES_PASSWORD,
+        postgres.dbname,
+        postgres.username,
+        postgres.password,
         'localhost',
         urlparse(conn_url).port
-    ).connect()
+    ).__enter__()
     assert persistence is not None
     with persistence.conn.cursor() as curs:
         curs.execute('show server_version')
