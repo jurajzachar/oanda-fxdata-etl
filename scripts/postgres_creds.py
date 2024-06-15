@@ -4,7 +4,7 @@ import string
 import argparse
 from sys import exit
 
-alphabet = string.ascii_letters + string.digits
+alphabet = string.printable
 
 
 def hash_pwd(pwd, role):
