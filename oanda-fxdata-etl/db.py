@@ -51,7 +51,7 @@ class Persistence:
                 port=self.db_port
             )
 
-            self.conn.set_session(isolation_level='SERIALIZABLE', autocommit=True)
+            self.conn.set_session(isolation_level='REPEATABLE_READ', autocommit=True)
 
             with self.conn.cursor() as curs:
                 curs.execute('select current_time')
@@ -96,7 +96,6 @@ class Persistence:
             cursor = self.conn.cursor()
             cursor.execute(insert_query, data_to_insert)
             result = cursor.fetchall()
-            self.conn.commit()
             cursor.close()
             return result
         except (Exception, psycopg2.DatabaseError) as error:
@@ -114,7 +113,6 @@ class Persistence:
                 f"INSERT INTO oanda.fx_files(path) values('{os.path.join(folder, filename)}') ON CONFLICT DO NOTHING "
                 f"RETURNING *")
             result = cursor.fetchone()
-            self.conn.commit()
             cursor.close()
             return result
         except (Exception, psycopg2.DatabaseError) as error:
@@ -131,7 +129,6 @@ class Persistence:
                 f"UPDATE oanda.fx_files SET time_processed = current_timestamp where path = '{path}'"
                 f"RETURNING *")
             result = cursor.fetchone()
-            self.conn.commit()
             cursor.close()
             return result
         except (Exception, psycopg2.DatabaseError) as error:

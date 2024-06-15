@@ -8,11 +8,11 @@ from db import Persistence
 from fs import list_in_dir, read_oanda_streams_file
 import threading
 
-# Create a lock
-lock = threading.Lock()
-
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s:\n %(message)s', level=logging.INFO)
+
+    # Create a lock
+    lock = threading.Lock()
 
     def partition(list, n: int):
         """helper function to partition list into fixed-sized chunks"""
@@ -46,6 +46,7 @@ if __name__ == "__main__":
                             persistence.insert_to_fx_prices(batch)
                 except Exception as e:
                     logging.error(f"recovering from error {e.args}")
+                    logging.warning(f"skipping {batch}")
                 with lock:
                     marked = assign_persistence().mark_fx_file_processed(path)
                 logging.info(f"path={marked} marked as successfully processed")
