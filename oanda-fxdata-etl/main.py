@@ -13,18 +13,19 @@ lock = threading.Lock()
 
 def process_file(entry):
     path = entry[0]
-    try:
-        logging.info(f"[Thread-{threading.get_ident()}] processing path={path} ...")
-        with Persistence.from_environment() as p:
+
+    logging.info(f"[Thread-{threading.get_ident()}] processing path={path} ...")
+    with Persistence.from_environment() as p:
+        try:
             for batch in list(partition(list(read_oanda_streams_file(path)), BATCH_SIZE)):
                 p.insert_to_fx_prices(batch)
             with lock:
                 marked = p.mark_fx_file_processed(path)
                 logging.info(f"[Thread-{threading.get_ident()}] path={marked} marked as successfully processed")
-
-    except Exception as persistenceError:
-        logging.error(f"recovering from error {persistenceError.args}")
-    return None
+        except Exception as persistenceError:
+            logging.error(f"recovering from error {persistenceError.args}")
+            logging.warning(f"skipping batch: {batch}")
+    return 1
 
 
 if __name__ == "__main__":
