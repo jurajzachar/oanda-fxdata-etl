@@ -2,6 +2,7 @@ import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
+import config
 from config import *
 from db import Persistence
 
@@ -29,6 +30,7 @@ def process_file(entry):
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname)s:\n %(message)s', level=logging.INFO)
 
+    max_workers = config.CPU_COUNT
 
     def partition(l, n: int):
         """helper function to partition list into fixed-sized chunks"""
@@ -48,7 +50,7 @@ if __name__ == "__main__":
         with Persistence.from_environment() as persistence:
             unprocessed = persistence.fetch_all_unprocessed()
             logging.info(f"fetched unprocessed files {len(unprocessed)}")
-            with ThreadPoolExecutor(max_workers=12) as executor:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
                 executor.map(process_file, unprocessed)
 
     except Exception as e:

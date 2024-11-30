@@ -89,13 +89,10 @@ class Persistence(AbstractContextManager):
             # create a new cursor
             with self.conn.cursor() as cursor:
                 cursor.execute(insert_query, data_to_insert)
-                result = cursor.fetchall()
             cursor.close()
-            return result
         except (Exception, psycopg2.DatabaseError) as error:
             self.conn.rollback()
             logging.error(f"failed to persist ({len(bulk_data)} items due to {error.args}")
-            return None
 
     def upsert_to_fx_files(self, folder, filename) -> (str, str):
         """ attempts to insert a new filesystem asset into oanda_fx_files if it does not exist.
