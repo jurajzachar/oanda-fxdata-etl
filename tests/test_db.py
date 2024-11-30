@@ -77,6 +77,8 @@ def test_should_mark_fx_file_processed(postgresql_session: Persistence):
     postgresql_session.upsert_to_fx_files('/folder1', 'file2')
     marked = postgresql_session.mark_fx_file_processed(os.path.join('/folder1', 'file2'))
     assert marked[0] is not None
+    unprocessed = postgresql_session.fetch_unprocessed(0)
+    assert len(unprocessed) == 0
 
 
 def test_should_upsert_to_fx_prices(postgresql_session: Persistence):
@@ -92,6 +94,6 @@ def test_should_upsert_to_fx_prices(postgresql_session: Persistence):
              "status": "tradeable", "tradeable": True, "instrument": "AUD_JPY"}]
 
     bulk_model_data = list(map(lambda x: unmarshall_from_wire(x), data))
-    inserted = postgresql_session.insert_to_fx_prices(bulk_data=bulk_model_data)
+    inserted = postgresql_session.insert_to_fx_prices(bulk_data=bulk_model_data, returning_data=True)
     assert inserted == [('("2021-10-22 19:34:08.122333+00",GBP_USD)',),
                         ('("2021-10-22 19:34:08.16674+00",AUD_JPY)',)]
