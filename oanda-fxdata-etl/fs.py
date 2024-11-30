@@ -21,7 +21,7 @@ def list_in_dir(dir: str) -> List[str]:
     return [f for f in listdir(dir) if isfile(join(dir, f)) and f.endswith(".gz")]
 
 
-def move_file_to_dir(file: str, source_dir: str, target_dir: str) -> str:
+def move_file_to_dir(file: str, source_dir: str, target_dir: str) -> None:
     if not os.path.isfile(file):
         raise RuntimeError(f"file '{file}' does not exist")
     filename = file.split(source_dir)[1]

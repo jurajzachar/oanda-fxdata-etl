@@ -15,10 +15,8 @@ def process_file(entry):
     logging.info(f"[Thread-{threading.get_ident()}] processing path={path} ...")
     with Persistence.from_environment() as p:
         try:
-
             for batch in list(partition(list(read_oanda_streams_file(path)), BATCH_SIZE)):
                 p.insert_to_fx_prices(batch)
-
             marked = p.mark_fx_file_processed(path)
             logging.info(f"[Thread-{threading.get_ident()}] path={marked} marked as successfully processed")
         except Exception as persistenceError:

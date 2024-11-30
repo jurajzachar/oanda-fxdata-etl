@@ -10,8 +10,8 @@ from pydantic import BaseModel
 
 @dataclass(frozen=True)
 class OandaPriceTick(BaseModel):
-    """Class for carrying best 3 levels of prices and liquidity at Oanda,
-    also see schema.sql"""
+    """Class for carrying the best 3 levels of prices and liquidity at Oanda,
+    see also sschema.sql"""
     # mandatory fields
     bid_price_l1: float
     bid_liquidity_l1: int
@@ -34,10 +34,10 @@ class OandaPriceTick(BaseModel):
     def closeout_midpoint(self) -> float:
         return float(self.closeout_ask) - float(self.closeout_bid) / 2 + float(self.closeout_bid)
 
-    def toJson(self) -> str:
+    def to_json(self) -> str:
         return self.model_dump_json(indent=2)
 
-    def toDict(self) -> dict:
+    def to_dict(self) -> dict:
         return self.model_dump()
 
 def unmarshall_from_wire(data: dict) -> Optional[OandaPriceTick]:
