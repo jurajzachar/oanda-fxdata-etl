@@ -19,11 +19,11 @@ websocket-client = "*"
 pyyaml = "*"
 postgres = "^4.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pyinstaller = "^6"
-pytest = "^8.1.1"
+pytest = "^8.3.3"
 coverage = "^7.4.4"
-pytest-cov = "^4"
+pytest-cov = "^6"
 mockito = "^1.4"
 testcontainers = {version=">=3.7", extras=["postgres"]}
 
