@@ -3,7 +3,7 @@
   <component name="Black">
     <option name="sdkName" value="Poetry (oanda-fxdata-etl)" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Poetry (oanda-fxdata-etl) (3)" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Poetry (oanda-fxdata-etl)" project-jdk-type="Python SDK" />
   <component name="PyCharmProfessionalAdvertiser">
     <option name="shown" value="true" />
   </component>

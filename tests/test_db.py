@@ -15,9 +15,9 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 @pytest.fixture(scope="function")
 def postgresql_session(request) -> Persistence:
     log.info("[fixture] starting db container")
-    # pin version to 14.10 to achieve timescaledb compat:
+    # pin version to 16.9 to achieve timescaledb compat:
     # https://docs.timescale.com/self-hosted/latest/install/installation-linux/
-    postgres = PostgresContainer("postgres:14.10")
+    postgres = PostgresContainer("postgres:16.9")
     postgres.start()
     conn_url = postgres.get_connection_url()
     log.info("[fixture] connecting to: {}".format(conn_url))
@@ -32,7 +32,7 @@ def postgresql_session(request) -> Persistence:
     with persistence.conn.cursor() as curs:
         curs.execute('show server_version')
         res = curs.fetchone()[0]
-        assert str(res).__contains__('14.10')
+        assert str(res).__contains__('16.9')
 
     persistence \
         .execute_migration('V1__create_new_schema.sql') \
